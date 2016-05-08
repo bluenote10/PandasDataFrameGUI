@@ -1,6 +1,6 @@
 # Pandas DataFrame GUI
 
-A minimalistic GUI for analyzing Pandas DataFrames.
+A minimalistic GUI for analyzing Pandas DataFrames based on wxPython.
 
 ## Features
 
@@ -12,9 +12,27 @@ A minimalistic GUI for analyzing Pandas DataFrames.
 - Histogram plots
 - Scatter plots
 
-## Example
+## Demo & Docs
 
-...
+The default view: Nothing fancy, just scrolling and sorting. The value of cell can be copied to clipboard by right clicking on a cell.
+
+![screen1](/../screenshots/screenshots/screen1.png)
+
+The column selection view: Left clicking enables or disables a column in the data frame view. Columns can be dragged with a right click to rearrange them.
+
+![screen2](/../screenshots/screenshots/screen2.png)
+
+The filter view: Allows to write arbitrary Pandas selection expressions. The syntax is: An underscore `_` will be replaced by the corresponding data frame column. That is, setting the combo box to a column named "A" and adding the condition `_ == 1` would result in an expression like `df[df["A"] == 1, :]`. The following example filters the data frame to rows which have the value 669944 in column "UserID" and `datetime.date` value between 2016-01-01 and 2016-03-01.
+
+![screen3](/../screenshots/screenshots/screen3.png)
+
+Histogram view:
+
+![screen4](/../screenshots/screenshots/screen4.png)
+
+Scatter plot view:
+
+![screen5](/../screenshots/screenshots/screen5.png)
 
 ## Requirements
 
