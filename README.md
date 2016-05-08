@@ -2,6 +2,11 @@
 
 A minimalistic GUI for analyzing Pandas DataFrames based on wxPython.
 
+## Usage
+
+    import dfgui
+    dfgui.show(df)
+
 ## Features
 
 - Tabular view of data frame
