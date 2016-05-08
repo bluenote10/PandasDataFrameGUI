@@ -414,7 +414,7 @@ class FilterPanel(wx.Panel):
         self.update_conditions()
 
     def update_conditions(self):
-        print("Updating conditions")
+        # print("Updating conditions")
         conditions = []
         for i in xrange(self.num_filters):
             column_index = self.combo_boxes[i].GetSelection()
@@ -424,7 +424,7 @@ class FilterPanel(wx.Panel):
                 column = self.columns[column_index - 1]
                 conditions += [(column, condition)]
         num_matching = self.df_list_ctrl.apply_filter(conditions)
-        print("Num matching:", num_matching)
+        # print("Num matching:", num_matching)
 
 
 class HistogramPlot(wx.Panel):
@@ -464,7 +464,7 @@ class HistogramPlot(wx.Panel):
             column_index1 -= 1
             df = self.df_list_ctrl.get_filtered_df()
             self.axes.clear()
-            self.axes.hist(df.iloc[:, column_index1])
+            self.axes.hist(df.iloc[:, column_index1], bins=100)
 
             self.canvas.draw()
 
