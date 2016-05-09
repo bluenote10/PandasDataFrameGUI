@@ -26,7 +26,7 @@ def create_dummy_data(size):
         return np.random.choice(values, size)
 
     random_dates = [
-        datetime.date(2016, 1, 1) + datetime.timedelta(days=delta)
+        datetime.date(2016, 1, 1) + datetime.timedelta(days=int(delta))
         for delta in np.random.randint(1, 50, size)
     ]
 

@@ -3,7 +3,15 @@
 
 from __future__ import absolute_import, division, print_function
 
-import wx
+try:
+    import wx
+except ImportError:
+    import sys
+    sys.path += [
+        "/usr/lib/python2.7/dist-packages/wx-2.8-gtk2-unicode",
+        "/usr/lib/python2.7/dist-packages"
+    ]
+    import wx
 
 import matplotlib
 matplotlib.use('WXAgg')
