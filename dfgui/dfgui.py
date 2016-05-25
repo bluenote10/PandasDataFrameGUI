@@ -59,7 +59,7 @@ class ListCtrlDataFrame(wx.ListCtrl):
 
         self.sort_by_column = None
 
-        self.mask = pd.Series([True] * self.df_orig.shape[0])
+        self.mask = [True] * self.df_orig.shape[0]
 
         # prepare attribute for alternating colors of rows
         self.attr_light_blue = wx.ListItemAttr()
@@ -107,7 +107,7 @@ class ListCtrlDataFrame(wx.ListCtrl):
             return len(self.df)
 
         no_error = True
-        self.mask = pd.Series([True] * self.df_orig.shape[0])
+        self.mask = [True] * self.df_orig.shape[0]
         for column, condition in conditions:
             if condition.strip() == '':
                 continue
