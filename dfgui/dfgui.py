@@ -59,7 +59,7 @@ class ListCtrlDataFrame(wx.ListCtrl):
 
         self.sort_by_column = None
 
-        self.mask = [True] * self.df_orig.shape[0]
+        self._reset_mask()
 
         # prepare attribute for alternating colors of rows
         self.attr_light_blue = wx.ListItemAttr()
@@ -71,6 +71,10 @@ class ListCtrlDataFrame(wx.ListCtrl):
         self.df = pd.DataFrame({})  # init empty to force initial update
         self._update_rows()
         self._update_columns(self.original_columns)
+
+    def _reset_mask(self):
+        #self.mask = [True] * self.df_orig.shape[0]
+        self.mask = pd.Series([True] * self.df_orig.shape[0])
 
     def _update_columns(self, columns):
         self.ClearAll()
@@ -86,7 +90,7 @@ class ListCtrlDataFrame(wx.ListCtrl):
         External interface to set the column projections.
         """
         self.current_columns = columns_to_use
-        self.df = self.df_orig[columns_to_use]
+        self._update_rows()
         self._update_columns(columns_to_use)
 
     def _update_rows(self):
@@ -101,34 +105,40 @@ class ListCtrlDataFrame(wx.ListCtrl):
         """
         External interface to set a filter.
         """
+        old_mask = self.mask.copy()
+
         if len(conditions) == 0:
-            self.mask = pd.Series([True] * self.df_orig.shape[0])
+            self._reset_mask()
+
+        else:
+            self._reset_mask()  # set all to True for destructive conjunction
+
+            no_error = True
+            for column, condition in conditions:
+                if condition.strip() == '':
+                    continue
+                condition = condition.replace("_", "self.df_orig['{}']".format(column))
+                print("Evaluating condition:", condition)
+                try:
+                    tmp_mask = eval(condition)
+                    if isinstance(tmp_mask, pd.Series) and tmp_mask.dtype == np.bool:
+                        self.mask &= tmp_mask
+                except Exception, e:
+                    print("Failed with:", e)
+                    no_error = False
+                    self.status_bar_callback(
+                        1,
+                        "Evaluating '{}' failed with: {}".format(condition, e)
+                    )
+
+            if no_error:
+                self.status_bar_callback(1, "")
+
+        has_changed = any(old_mask != self.mask)
+        if has_changed:
             self._update_rows()
-            return len(self.df)
 
-        no_error = True
-        self.mask = [True] * self.df_orig.shape[0]
-        for column, condition in conditions:
-            if condition.strip() == '':
-                continue
-            condition = condition.replace("_", "self.df_orig['{}']".format(column))
-            print("Evaluation condition:", condition)
-            try:
-                tmp_mask = eval(condition)
-                if isinstance(tmp_mask, pd.Series) and tmp_mask.dtype == np.bool:
-                    self.mask &= tmp_mask
-            except Exception, e:
-                print("Failed with:", e)
-                no_error = False
-                self.status_bar_callback(
-                    1,
-                    "Evaluating '{}' failed with: {}".format(condition, e)
-                )
-
-        if no_error:
-            self.status_bar_callback(1, "")
-        self._update_rows()
-        return len(self.df)
+        return len(self.df), has_changed
 
     def get_selected_items(self):
         """
@@ -384,12 +394,13 @@ class FilterPanel(wx.Panel):
     """
     Panel for defining filter expressions.
     """
-    def __init__(self, parent, columns, df_list_ctrl):
+    def __init__(self, parent, columns, df_list_ctrl, change_callback):
         wx.Panel.__init__(self, parent)
 
         columns_with_neutral_selection = [''] + list(columns)
         self.columns = columns
         self.df_list_ctrl = df_list_ctrl
+        self.change_callback = change_callback
 
         self.num_filters = 10
 
@@ -431,7 +442,9 @@ class FilterPanel(wx.Panel):
                 # since we have added a dummy column for "deselect", we have to subtract one
                 column = self.columns[column_index - 1]
                 conditions += [(column, condition)]
-        num_matching = self.df_list_ctrl.apply_filter(conditions)
+        num_matching, has_changed = self.df_list_ctrl.apply_filter(conditions)
+        if has_changed:
+            self.change_callback()
         # print("Num matching:", num_matching)
 
 
@@ -466,15 +479,21 @@ class HistogramPlot(wx.Panel):
         self.SetSizer(sizer)
 
     def on_combo_box_select(self, event):
+        self.redraw()
+
+    def redraw(self):
         column_index1 = self.combo_box1.GetSelection()
         if column_index1 != wx.NOT_FOUND and column_index1 != 0:
             # subtract one to remove the neutral selection index
             column_index1 -= 1
-            df = self.df_list_ctrl.get_filtered_df()
-            self.axes.clear()
-            self.axes.hist(df.iloc[:, column_index1], bins=100)
 
-            self.canvas.draw()
+            df = self.df_list_ctrl.get_filtered_df()
+
+            if len(df) > 0:
+                self.axes.clear()
+                self.axes.hist(df.iloc[:, column_index1].values, bins=100)
+
+                self.canvas.draw()
 
 
 class ScatterPlot(wx.Panel):
@@ -510,6 +529,9 @@ class ScatterPlot(wx.Panel):
         self.SetSizer(sizer)
 
     def on_combo_box_select(self, event):
+        self.redraw()
+
+    def redraw(self):
         column_index1 = self.combo_box1.GetSelection()
         column_index2 = self.combo_box2.GetSelection()
         if column_index1 != wx.NOT_FOUND and column_index1 != 0 and \
@@ -525,10 +547,11 @@ class ScatterPlot(wx.Panel):
             # column_name2 = self.columns[column_index2]
             # df.plot(kind='scatter', x=column_name1, y=column_name2)
 
-            self.axes.clear()
-            self.axes.plot(df.iloc[:, column_index1], df.iloc[:, column_index2], 'o')
+            if len(df) > 0:
+                self.axes.clear()
+                self.axes.plot(df.iloc[:, column_index1].values, df.iloc[:, column_index2].values, 'o', clip_on=False)
 
-            self.canvas.draw()
+                self.canvas.draw()
 
 
 class MainFrame(wx.Frame):
@@ -551,7 +574,7 @@ class MainFrame(wx.Frame):
         # create the page windows as children of the notebook
         self.page1 = DataframePanel(nb, df, self.status_bar_callback)
         self.page2 = ColumnSelectionPanel(nb, columns, self.page1.df_list_ctrl)
-        self.page3 = FilterPanel(nb, columns, self.page1.df_list_ctrl)
+        self.page3 = FilterPanel(nb, columns, self.page1.df_list_ctrl, self.selection_change_callback)
         self.page4 = HistogramPlot(nb, columns, self.page1.df_list_ctrl)
         self.page5 = ScatterPlot(nb, columns, self.page1.df_list_ctrl)
 
@@ -589,6 +612,10 @@ class MainFrame(wx.Frame):
 
     def status_bar_callback(self, i, new_text):
         self.SetStatusText(new_text, i)
+
+    def selection_change_callback(self):
+        self.page4.redraw()
+        self.page5.redraw()
 
 
 def show(df):
