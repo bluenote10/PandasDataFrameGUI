@@ -4,8 +4,10 @@ A minimalistic GUI for analyzing Pandas DataFrames based on wxPython.
 
 ## Usage
 
-    import dfgui
-    dfgui.show(df)
+```python
+import dfgui
+dfgui.show(df)
+```
 
 ## Features
 
@@ -41,7 +43,24 @@ Scatter plot view:
 
 ## Requirements
 
+Since wxPython is not pip-installable, dfgui does not handle dependencies automatically. You have to make sure the following packages are installed:
+
 - pandas/numpy
 - matplotlib
 - wx
+
+## Installation Instructions
+
+I haven't submitted dfgui to PyPI (yet), but you can install directly from git (having met all requirements). For instance:
+
+```bash
+git clone git@github.com:bluenote10/PandasDataFrameGUI.git dfgui
+cd dfgui
+pip install -e .
+# and to check if everything works:
+./demo.py
+```
+
+In fact, dfgui only consists of a single module, so you might as well just download the file [`dfgui/dfgui.py`](dfgui/dfgui.py).
+
 
