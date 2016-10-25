@@ -95,7 +95,7 @@ class ListCtrlDataFrame(wx.ListCtrl):
 
     def _update_rows(self):
         old_len = len(self.df)
-        self.df = self.df_orig.loc[self.mask, self.current_columns]
+        self.df = self.df_orig.loc[self.mask.values, self.current_columns]
         new_len = len(self.df)
         if old_len != new_len:
             self.SetItemCount(new_len)
