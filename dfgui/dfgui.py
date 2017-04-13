@@ -74,7 +74,7 @@ class ListCtrlDataFrame(wx.ListCtrl):
 
     def _reset_mask(self):
         #self.mask = [True] * self.df_orig.shape[0]
-        self.mask = pd.Series([True] * self.df_orig.shape[0])
+        self.mask = pd.Series([True] * self.df_orig.shape[0], index=self.df_orig.index)
 
     def _update_columns(self, columns):
         self.ClearAll()
