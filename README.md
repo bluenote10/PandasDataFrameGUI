@@ -60,6 +60,20 @@ pip install -e .
 # and to check if everything works:
 ./demo.py
 ```
+### Anaconda/Windows Instructions
+
+Install wxpython through conda or the Anaconda GUI.
+
+"Open terminal" in the Anaconda GUI environment.
+
+```bash
+git clone "https://github.com/bluenote10/PandasDataFrameGUI.git"
+cd dfgui
+pip install -e .
+conda package --pkg-name=dfgui --pkg-version=0.1 # this should create a package file
+conda install --offline dfgui-0.1-py27_0.tar.bz2 # this should install into your conda environment
+```
+Then restart your Jupyter kernel.
 
 In fact, dfgui only consists of a single module, so you might as well just download the file [`dfgui/dfgui.py`](dfgui/dfgui.py).
 
