@@ -491,7 +491,14 @@ class HistogramPlot(wx.Panel):
 
             if len(df) > 0:
                 self.axes.clear()
-                self.axes.hist(df.iloc[:, column_index1].values, bins=100)
+
+                column = df.iloc[:, column_index1]
+                is_string_col = column.dtype == np.object and isinstance(column.values[0], str)
+                if is_string_col:
+                    value_counts = column.value_counts().sort_index()
+                    value_counts.plot(kind='bar', ax=self.axes)
+                else:
+                    self.axes.hist(column.values, bins=100)
 
                 self.canvas.draw()
 
