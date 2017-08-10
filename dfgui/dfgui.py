@@ -246,7 +246,7 @@ class ListCtrlDataFrame(wx.ListCtrl):
         """
         value = self.df.iloc[item, col]
         # print("retrieving %d %d %s" % (item, col, value))
-        return value
+        return str(value)
 
     def OnGetItemAttr(self, item):
         """
