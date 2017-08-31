@@ -54,6 +54,12 @@ Since wxPython is not pip-installable, dfgui does not handle dependencies automa
 I haven't submitted dfgui to PyPI (yet), but you can install directly from git (having met all requirements). For instance:
 
 ```bash
+pip install git+https://github.com/bluenote10/PandasDataFrameGUI
+```
+
+or if you prefer a regular git clone:
+
+```bash
 git clone git@github.com:bluenote10/PandasDataFrameGUI.git dfgui
 cd dfgui
 pip install -e .
