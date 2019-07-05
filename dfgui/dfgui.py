@@ -287,8 +287,9 @@ class ListBoxDraggable(wx.ListBox):
         if isinstance(data,(pd.RangeIndex,pd.Int64Index)):
             # RangeIndex is not supported by self._update_columns
             data = pd.Index([str(i) for i in data])
-        self.InsertItems(data, 0)
         self.data = data
+
+        self.InsertItems(self.data, 0)
 
         self.Bind(wx.EVT_LISTBOX, self.on_selection_changed)
 
