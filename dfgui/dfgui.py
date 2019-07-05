@@ -55,6 +55,9 @@ class ListCtrlDataFrame(wx.ListCtrl):
 
         self.df_orig = df
         self.original_columns = self.df_orig.columns[:]
+        if isinstance(self.original_columns,(pd.RangeIndex,pd.Int64Index)):
+            # RangeIndex is not supported by self._update_columns
+            self.original_columns = pd.Index([str(i) for i in self.original_columns])
         self.current_columns = self.df_orig.columns[:]
 
         self.sort_by_column = None
@@ -281,9 +284,11 @@ class ListBoxDraggable(wx.ListBox):
 
         wx.ListBox.__init__(self, parent, size, **kwargs)
 
-        self.data = data
-
+        if isinstance(data,(pd.RangeIndex,pd.Int64Index)):
+            # RangeIndex is not supported by self._update_columns
+            data = pd.Index([str(i) for i in data])
         self.InsertItems(data, 0)
+        self.data = data
 
         self.Bind(wx.EVT_LISTBOX, self.on_selection_changed)
 
@@ -574,7 +579,9 @@ class MainFrame(wx.Frame):
         self.nb = nb
 
         columns = df.columns[:]
-
+        if isinstance(columns,(pd.RangeIndex,pd.Int64Index)):
+            # RangeIndex is not supported
+            columns = pd.Index([str(i) for i in columns])
         self.CreateStatusBar(2, style=0)
         self.SetStatusWidths([200, -1])
 
