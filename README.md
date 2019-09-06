@@ -2,6 +2,8 @@
 
 A minimalistic GUI for analyzing Pandas DataFrames based on wxPython.
 
+**Update:** I'm currently working on a successor [tabloo](https://github.com/bluenote10/tabloo) which avoids native dependencies and offers a more modern user interface.
+
 ## Usage
 
 ```python
